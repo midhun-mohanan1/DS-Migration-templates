@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>cPanel Post-Migration - Migration Email Templates</title>
+<script>
+  (function(){
+    try{
+      var saved = localStorage.getItem('migrationToolTheme');
+      if(saved === 'dark') document.documentElement.setAttribute('data-theme','dark');
+    }catch(e){}
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="src/css/main.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="dot"></span>
+      <span>Migration Email Templates</span>
+    </div>
+    <nav id="sideNav">
+      <div class="nav-group-label">Pre-Migration</div>
+      <a href="index.html" class="nav-item">Pre-Migration Notice</a>
+
+      <div class="nav-group-label">Post-Migration</div>
+      <a href="cpanel.html" class="nav-item active">cPanel (Email / Website)</a>
+      <a href="titan.html" class="nav-item">TITAN &ndash; Standard</a>
+      <a href="titansecure.html" class="nav-item">TITAN &ndash; Secure Link</a>
+      <a href="exchange.html" class="nav-item">Exchange</a>
+
+      <div class="nav-group-label">Internal</div>
+      <a href="notes.html" class="nav-item">Migration Case Notes</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <h1>cPanel Post-Migration</h1>
+      <div class="theme-toggle" id="themeToggle">
+        <span class="opt active" data-theme-value="light">Light</span>
+        <span class="opt" data-theme-value="dark">Dark</span>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div class="form-col">
+
+        <!-- Shared Case Details -->
+        <div class="shared-fields">
+          <h2>Case Details</h2>
+          <div class="field">
+            <label for="g_domain">Domain</label>
+            <input type="text" id="g_domain" placeholder="e.g. winkey.com.sg">
+          </div>
+          <div class="field">
+            <label for="g_additionalDomains">Additional domains (optional)</label>
+            <textarea id="g_additionalDomains" placeholder="One per line or comma-separated, e.g. example2.com, example3.com" style="min-height:44px;"></textarea>
+          </div>
+          <div id="sharedExtra">
+            <div class="row2">
+              <div class="field">
+                <label for="g_ticketId">Ticket ID</label>
+                <input type="text" id="g_ticketId" placeholder="E-586620">
+              </div>
+              <div class="field">
+                <label>Brand</label>
+                <div class="toggle-group" id="brandToggle">
+                  <button type="button" data-value="crazydomains" class="active">Crazy Domains</button>
+                  <button type="button" data-value="vodien">Vodien</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- cPanel Panel Form -->
+        <div class="panel active" id="panel-cpanel">
+          <h2>Migration Type</h2>
+          <div class="field">
+            <div class="toggle-group" id="migType_cpanel">
+              <button type="button" data-value="email" class="active">Email only</button>
+              <button type="button" data-value="website">Website only</button>
+              <button type="button" data-value="both">Website + Email</button>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+          <h2>Server</h2>
+          <div class="field">
+            <label for="cp_server">Server hostname (for webmail login)</label>
+            <input type="text" id="cp_server" placeholder="e.g. cp-sbeat02.per01.ds.network">
+          </div>
+          <div class="field" id="cp_sslModeWrap">
+            <label>SSL mail server address</label>
+            <div class="toggle-group" id="cp_sslMode">
+              <button type="button" data-value="domain" class="active">Domain name</button>
+              <button type="button" data-value="server">Server hostname</button>
+            </div>
+            <div class="hint">Non-SSL settings always use mail.[domain] &mdash; this only affects the SSL/TLS block.</div>
+          </div>
+
+          <div class="divider"></div>
+          <h2>Website</h2>
+          <div id="cp_websiteWrap" style="display:none;">
+            <div class="checkbox-row" id="cp_websiteTestedWrap" style="display:none;">
+              <input type="checkbox" id="cp_websiteTested" checked>
+              <label for="cp_websiteTested">Mention websites tested and loading fine</label>
+            </div>
+            <div class="checkbox-row">
+              <input type="checkbox" id="cp_previewLink">
+              <label for="cp_previewLink">Include a website preview link</label>
+            </div>
+            <div class="field" id="cp_previewUrlWrap" style="display:none;">
+              <label for="cp_previewUrl">Preview URL</label>
+              <input type="text" id="cp_previewUrl" placeholder="e.g. https://46e6749a.siteviewer.in/">
+            </div>
+            <div class="checkbox-row">
+              <input type="checkbox" id="cp_dnsChecker" checked>
+              <label for="cp_dnsChecker">Include DNS propagation tracking link (A record)</label>
+            </div>
+            <div class="checkbox-row" id="cp_accessGuideWrap" style="display:none;">
+              <input type="checkbox" id="cp_accessGuide" checked>
+              <label for="cp_accessGuide">Include cPanel access guide link</label>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+          <h2>Closing</h2>
+          <div class="checkbox-row">
+            <input type="checkbox" id="cp_screenshots" checked>
+            <label for="cp_screenshots">Mention screenshots attached</label>
+          </div>
+          <div class="field">
+            <label for="cp_notes">Additional notes (optional)</label>
+            <textarea id="cp_notes" placeholder="Anything extra to append at the end..."></textarea>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Output Column -->
+      <div class="output-col">
+        <div class="output-head">
+          <h2>Preview</h2>
+          <div class="actions">
+            <button class="btn" id="resetBtn">Reset</button>
+            <button class="btn primary" id="copyBtn">Copy</button>
+          </div>
+        </div>
+        <div class="terminal"><pre id="output"></pre></div>
+        <div class="status-line">
+          <span id="wordCount">0 words</span>
+          <span id="charCount">0 characters</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+  let activeBrand = 'crazydomains';
+  let migTypeCpanel = 'email';
+  let cpSslMode = 'domain';
+
+  const TYPE_META = {
+    email:   { label:'email', includesEmail:true, includesWebsite:false },
+    website: { label:'website', includesEmail:false, includesWebsite:true },
+    both:    { label:'website and email', includesEmail:true, includesWebsite:true }
+  };
+
+  const BRANDS = {
+    crazydomains: {
+      cpanelGuides: [
+        {label:'Email password change', url:'https://www.crazydomains.com.au/help/article/how-to-change-email-account-password-cpanel'},
+        {label:'Email setup guide', url:'https://www.crazydomains.com.au/help/article/email-setup-guide'},
+        {label:'cPanel access guide', url:'https://www.crazydomains.com.au/help/article/how-to-access-your-cpanel'}
+      ]
+    },
+    vodien: {
+      cpanelGuides: [
+        {label:'Email setup guides', url:'https://www.vodien.com/help/article/email-setup-guides'},
+        {label:'Change email password', url:'https://www.vodien.com/help/article/change-email-password-in-vodien'},
+        {label:'cPanel access guide', url:'https://www.vodien.com/help/article/how-to-access-your-cpanel'}
+      ]
+    }
+  };
+
+  function getAdditionalDomains(){
+    const raw = $('g_additionalDomains').value.trim();
+    if(!raw) return [];
+    return raw.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
+  }
+
+  function primaryDomain(){
+    return $('g_domain').value.trim() || '[domain]';
+  }
+
+  function domainArray(){
+    return [primaryDomain(), ...getAdditionalDomains()];
+  }
+
+  function domainList(){
+    const list = domainArray();
+    if(list.length === 1) return list[0];
+    if(list.length === 2) return `${list[0]} and ${list[1]}`;
+    return `${list.slice(0,-1).join(', ')} and ${list[list.length-1]}`;
+  }
+
+  function generate(){
+    const meta = TYPE_META[migTypeCpanel];
+    const domain = primaryDomain();
+    const server = $('cp_server').value.trim() || '[server hostname]';
+    const sslHost = cpSslMode === 'server' ? server : domain;
+    const brand = BRANDS[activeBrand];
+
+    const p = [];
+
+    const openingByType = {
+      email: `The Email Migration is now completed for ${domainList()}.`,
+      website: `The Website migration of ${domainList()} is now completed.`,
+      both: `The Email and website Migration is now completed for ${domainList()}.`
+    };
+    p.push(openingByType[migTypeCpanel]);
+
+    const dnsByType = {
+      email: 'We have already updated the email-related DNS records.',
+      website: 'We have updated the DNS records and they are in propagation.',
+      both: 'We have already updated the DNS records.'
+    };
+    p.push(dnsByType[migTypeCpanel]);
+
+    let propNote = 'Please note that DNS propagation may take approximately 4\u20136 hours to complete.';
+    if(meta.includesEmail){
+      propNote += ' During this time, some users may continue to connect to the previous mail server while others may connect to the new platform.';
+    }
+    p.push(propNote);
+
+    if(migTypeCpanel === 'website'){
+      p.push('Once DNS propagation has completed, all website traffic will be served from the new server.');
+    }
+    if(migTypeCpanel === 'both' && $('cp_websiteTested').checked){
+      p.push('We have also tested the websites from the new server and websites are loading fine.');
+    }
+
+    if($('cp_screenshots').checked){
+      const shot = migTypeCpanel === 'website'
+        ? 'We have also attached screenshots of the website preview for your reference.'
+        : 'We have also attached screenshots for your reference.';
+      p.push(shot);
+    }
+
+    if(meta.includesWebsite){
+      if($('cp_previewLink').checked){
+        const url = $('cp_previewUrl').value.trim() || '[preview URL]';
+        p.push(`You can access the preview via this URL ${url}`);
+      }
+      if($('cp_dnsChecker').checked){
+        p.push(`You can track the DNS propagation from the below URL: https://dnschecker.org/#A/${domain}`);
+      }
+      if(migTypeCpanel === 'website' && $('cp_accessGuide').checked){
+        const guide = brand.cpanelGuides.find(g => g.label === 'cPanel access guide') || brand.cpanelGuides[0];
+        p.push(`To access the cPanel of your account, please use the below article:\n${guide.url}`);
+      }
+    }
+
+    if(meta.includesEmail){
+      p.push(`You can access the webmail from the below URL: https://${server}:2096/\nUsername: Your full email address\nPassword: Use the email account's password.`);
+      p.push('Please note that if you are using any email clients such as Outlook, Thunderbird, Apple Mail, or mobile mail applications, you will need to reconfigure them using the new mail server settings after the DNS is updated and propagation is completed.');
+      p.push(`For configuring your email on devices or applications, please use the recommended settings below:\n\nRecommended Email Configuration (SSL/TLS):\nUsername: Your full email address\nPassword: Use the email account's password.\nIncoming Server: ${sslHost}\nIMAP Port: 993   POP3 Port: 995\nOutgoing Server: ${sslHost}\nSMTP Port: 465\n\n---------------------------------------------------------------\n\nNon-SSL Settings (Not Recommended):\nUsername: Your full email address\nPassword: Use the email account's password.\nIncoming Server: mail.${domain}\nIMAP Port: 143   POP3 Port: 110\nOutgoing Server: mail.${domain}\nSMTP Port: 587`);
+
+      const guideLines = brand.cpanelGuides.map(g => `${g.label}:\n${g.url}`).join('\n\n');
+      p.push(`For your convenience, you may refer to the following guides for email setup and management:\n\nHelpful Guides:\n${guideLines}`);
+    }
+
+    const closingByType = {
+      email: "Should you encounter any issues during setup or notice discrepancies in your email functionality, don't hesitate to contact us. We're here to help!",
+      website: "Should you encounter any issues during setup or notice discrepancies in your website functionality, don't hesitate to contact us. We're here to help!",
+      both: "Should you encounter any issues during setup or notice discrepancies in your website or email functionality, don't hesitate to contact us. We're here to help!"
+    };
+    p.push(closingByType[migTypeCpanel]);
+
+    const notes = $('cp_notes').value.trim();
+    if(notes) p.push(notes);
+
+    const text = p.join('\n\n');
+    $('output').textContent = text;
+    const words = text.trim().split(/\s+/).filter(Boolean).length;
+    $('wordCount').textContent = `${words} words`;
+    $('charCount').textContent = `${text.length} characters`;
+  }
+
+  // Theme toggle
+  function applyTheme(theme){
+    document.documentElement.setAttribute('data-theme', theme);
+    document.querySelectorAll('#themeToggle .opt').forEach(o=>{
+      o.classList.toggle('active', o.dataset.themeValue === theme);
+    });
+    try{ localStorage.setItem('migrationToolTheme', theme); }catch(e){}
+  }
+  document.querySelectorAll('#themeToggle .opt').forEach(opt=>{
+    opt.addEventListener('click', ()=> applyTheme(opt.dataset.themeValue));
+  });
+  applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
+
+  // Brand toggle
+  document.querySelectorAll('#brandToggle button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#brandToggle button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      activeBrand = btn.dataset.value;
+      generate();
+    });
+  });
+
+  // Migration type toggle
+  document.querySelectorAll('#migType_cpanel button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#migType_cpanel button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      migTypeCpanel = btn.dataset.value;
+      $('cp_websiteWrap').style.display = TYPE_META[migTypeCpanel].includesWebsite ? 'block' : 'none';
+      $('cp_websiteTestedWrap').style.display = migTypeCpanel === 'both' ? 'flex' : 'none';$('cp_accessGuideWrap').style.display = migTypeCpanel === 'website' ? 'flex' : 'none';
+      generate();
+    });
+  });
+
+  document.querySelectorAll('#cp_sslMode button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#cp_sslMode button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      cpSslMode = btn.dataset.value;
+      generate();
+    });
+  });
+
+  // Conditional listeners
+  $('cp_previewLink').addEventListener('change', ()=>{
+    $('cp_previewUrlWrap').style.display =$('cp_previewLink').checked ? 'block' : 'none';
+    generate();
+  });
+
+  // Bind inputs
+  document.querySelectorAll('input[type=text], select, textarea, input[type=checkbox]').forEach(el=>{
+    el.addEventListener('input', generate);
+    el.addEventListener('change', generate);
+  });
+
+  // Copy / Reset
+  $('copyBtn').addEventListener('click', async ()=>{
+    const text = $('output').textContent;
+    try{ await navigator.clipboard.writeText(text); }catch(e){}
+    const btn = $('copyBtn');
+    const original = btn.textContent;
+    btn.textContent = 'Copied';
+    btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent = original; btn.classList.remove('copied'); }, 1600);
+  });
+
+  $('resetBtn').addEventListener('click', ()=>{
+    document.querySelectorAll('input[type=text]').forEach(el=>el.value='');
+    document.querySelectorAll('textarea').forEach(el=>el.value='');
+    $('cp_websiteTested').checked = true;
+    $('cp_previewLink').checked = false;
+    $('cp_dnsChecker').checked = true;
+    $('cp_accessGuide').checked = true;
+    $('cp_screenshots').checked = true;
+    $('cp_previewUrlWrap').style.display = 'none';
+    generate();
+  });
+
+  generate();
+</script>
+
+</body>
+</html>

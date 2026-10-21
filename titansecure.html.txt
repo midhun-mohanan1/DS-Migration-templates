@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TITAN Secure Link - Migration Email Templates</title>
+<script>
+  (function(){
+    try{
+      var saved = localStorage.getItem('migrationToolTheme');
+      if(saved === 'dark') document.documentElement.setAttribute('data-theme','dark');
+    }catch(e){}
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="src/css/main.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="dot"></span>
+      <span>Migration Email Templates</span>
+    </div>
+    <nav id="sideNav">
+      <div class="nav-group-label">Pre-Migration</div>
+      <a href="index.html" class="nav-item">Pre-Migration Notice</a>
+
+      <div class="nav-group-label">Post-Migration</div>
+      <a href="cpanel.html" class="nav-item">cPanel (Email / Website)</a>
+      <a href="titan.html" class="nav-item">TITAN &ndash; Standard</a>
+      <a href="titansecure.html" class="nav-item active">TITAN &ndash; Secure Link</a>
+      <a href="exchange.html" class="nav-item">Exchange</a>
+
+      <div class="nav-group-label">Internal</div>
+      <a href="notes.html" class="nav-item">Migration Case Notes</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <h1>TITAN Post-Migration &ndash; Secure Link</h1>
+      <div class="theme-toggle" id="themeToggle">
+        <span class="opt active" data-theme-value="light">Light</span>
+        <span class="opt" data-theme-value="dark">Dark</span>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div class="form-col">
+        <div class="shared-fields">
+          <h2>Case Details</h2>
+          <div class="field">
+            <label for="g_domain">Domain</label>
+            <input type="text" id="g_domain" placeholder="e.g. winkey.com.sg">
+          </div>
+          <div class="field">
+            <label for="g_additionalDomains">Additional domains (optional)</label>
+            <textarea id="g_additionalDomains" placeholder="One per line or comma-separated" style="min-height:44px;"></textarea>
+          </div>
+          <div class="field">
+            <label>Brand</label>
+            <div class="toggle-group" id="brandToggle">
+              <button type="button" data-value="crazydomains" class="active">Crazy Domains</button>
+              <button type="button" data-value="vodien">Vodien</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel active" id="panel-titansecure">
+          <h2>Secure Credentials</h2>
+          <div class="field">
+            <label for="ts_secureUrl">Secure credential URL (e.g. PrivateBin)</label>
+            <input type="text" id="ts_secureUrl" placeholder="https://privatebin.support-tools.com/?...">
+            <div class="hint">Used when sharing login details via a one-time secure link instead of typing them inline.</div>
+          </div>
+          <div class="divider"></div>
+          <div class="field">
+            <label for="ts_notes">Additional notes (optional)</label>
+            <textarea id="ts_notes" placeholder="Anything extra to append at the end..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="output-col">
+        <div class="output-head">
+          <h2>Preview</h2>
+          <div class="actions">
+            <button class="btn" id="resetBtn">Reset</button>
+            <button class="btn primary" id="copyBtn">Copy</button>
+          </div>
+        </div>
+        <div class="terminal"><pre id="output"></pre></div>
+        <div class="status-line">
+          <span id="wordCount">0 words</span>
+          <span id="charCount">0 characters</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+  let activeBrand = 'crazydomains';
+
+  const TITAN_ENABLE_THIRD_PARTY_ARTICLE = 'https://support.titan.email/hc/en-us/articles/25005307786905-Enable-Titan-on-other-apps';
+  const BRANDS = {
+    crazydomains: {
+      titanWebmail: 'https://crazydomains.titan.email/login/',
+      titanForgotPasswordArticle: null,
+      titanSecureArticles: ['https://www.crazydomains.com.au/help/article/how-to-use-titan-email', TITAN_ENABLE_THIRD_PARTY_ARTICLE]
+    },
+    vodien: {
+      titanWebmail: 'https://vodien.titan.email/login/',
+      titanForgotPasswordArticle: 'https://support.titan.email/hc/en-us/articles/900003722546-Forgot-password-for-your-mailbox',
+      titanSecureArticles: ['https://www.vodien.com/help/article/using-titan-email', TITAN_ENABLE_THIRD_PARTY_ARTICLE]
+    }
+  };
+
+  function getAdditionalDomains(){
+    const raw = $('g_additionalDomains').value.trim();
+    if(!raw) return [];
+    return raw.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
+  }
+
+  function primaryDomain(){ return $('g_domain').value.trim() || '[domain]'; }
+  function domainArray(){ return [primaryDomain(), ...getAdditionalDomains()]; }
+  function domainList(){
+    const list = domainArray();
+    if(list.length === 1) return list[0];
+    if(list.length === 2) return `${list[0]} and ${list[1]}`;
+    return `${list.slice(0,-1).join(', ')} and ${list[list.length-1]}`;
+  }
+
+  function generate(){
+    const brand = BRANDS[activeBrand];
+    const secureUrl = $('ts_secureUrl').value.trim() || '[secure credential URL]';
+    const p = [];
+
+    p.push(`We are pleased to inform you that the email migration for ${domainList()} has been successfully completed.`);
+    p.push(`You can find the login details to access TITAN Webmail at the following secure PrivateBin URL:\n${secureUrl}`);
+    p.push('Since the domain is using our name servers, we have updated the DNS records. Please note that it may take anywhere from 2 to 4 hours for these changes to fully propagate across the globe.');
+    p.push(`TITAN webmail login URL: ${brand.titanWebmail}`);
+
+    if(brand.titanForgotPasswordArticle){
+      p.push(`If you want to reset the password, please follow these steps:\n${brand.titanForgotPasswordArticle}`);
+    }
+
+    p.push(`To set up your TITAN email on other mail clients (such as Outlook, Apple Mail, or mobile apps), please refer to the following helpful article:\n${brand.titanSecureArticles[0]}`);
+    p.push(`You can access your Titan emails on other email clients by enabling Titan on third-party apps. Please follow the below article for enabling third-party apps:\n${brand.titanSecureArticles[1]}`);
+    p.push("Please check and let us know if you have any further questions or concerns \u2014 we're happy to assist.");
+
+    const notes = $('ts_notes').value.trim();
+    if(notes) p.push(notes);
+
+    const text = p.join('\n\n');
+    $('output').textContent = text;
+    $('wordCount').textContent = `${text.trim().split(/\s+/).filter(Boolean).length} words`;
+    $('charCount').textContent = `${text.length} characters`;
+  }
+
+  function applyTheme(theme){
+    document.documentElement.setAttribute('data-theme', theme);
+    document.querySelectorAll('#themeToggle .opt').forEach(o=>o.classList.toggle('active', o.dataset.themeValue === theme));
+    try{ localStorage.setItem('migrationToolTheme', theme); }catch(e){}
+  }
+  document.querySelectorAll('#themeToggle .opt').forEach(opt=>opt.addEventListener('click', ()=> applyTheme(opt.dataset.themeValue)));
+  applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
+
+  document.querySelectorAll('#brandToggle button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#brandToggle button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      activeBrand = btn.dataset.value;
+      generate();
+    });
+  });
+
+  document.querySelectorAll('input[type=text], textarea').forEach(el=>el.addEventListener('input', generate));
+  $('copyBtn').addEventListener('click', async ()=>{
+    try{ await navigator.clipboard.writeText($('output').textContent); }catch(e){}
+    const btn = $('copyBtn');
+    btn.textContent = 'Copied';
+    btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1600);
+  });
+  $('resetBtn').addEventListener('click', ()=>{
+    document.querySelectorAll('input[type=text], textarea').forEach(el=>el.value='');
+    generate();
+  });
+  generate();
+</script>
+</body>
+</html>

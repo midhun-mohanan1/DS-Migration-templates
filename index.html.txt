@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pre-Migration Notice - Migration Email Templates</title>
+<script>
+  (function(){
+    try{
+      var saved = localStorage.getItem('migrationToolTheme');
+      if(saved === 'dark') document.documentElement.setAttribute('data-theme','dark');
+    }catch(e){}
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="src/css/main.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="dot"></span>
+      <span>Migration Email Templates</span>
+    </div>
+    <nav id="sideNav">
+      <div class="nav-group-label">Pre-Migration</div>
+      <a href="index.html" class="nav-item active">Pre-Migration Notice</a>
+
+      <div class="nav-group-label">Post-Migration</div>
+      <a href="cpanel.html" class="nav-item">cPanel (Email / Website)</a>
+      <a href="titan.html" class="nav-item">TITAN &ndash; Standard</a>
+      <a href="titansecure.html" class="nav-item">TITAN &ndash; Secure Link</a>
+      <a href="exchange.html" class="nav-item">Exchange</a>
+
+      <div class="nav-group-label">Internal</div>
+      <a href="notes.html" class="nav-item">Migration Case Notes</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <h1>Pre-Migration Notice</h1>
+      <div class="theme-toggle" id="themeToggle">
+        <span class="opt active" data-theme-value="light">Light</span>
+        <span class="opt" data-theme-value="dark">Dark</span>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div class="form-col">
+
+        <!-- Shared Case Details -->
+        <div class="shared-fields">
+          <h2>Case Details</h2>
+          <div class="field">
+            <label for="g_domain">Domain</label>
+            <input type="text" id="g_domain" placeholder="e.g. winkey.com.sg">
+          </div>
+          <div class="field">
+            <label for="g_additionalDomains">Additional domains (optional)</label>
+            <textarea id="g_additionalDomains" placeholder="One per line or comma-separated, e.g. example2.com, example3.com" style="min-height:44px;"></textarea>
+          </div>
+          <div id="sharedExtra">
+            <div class="row2">
+              <div class="field">
+                <label for="g_ticketId">Ticket ID</label>
+                <input type="text" id="g_ticketId" placeholder="E-586620">
+              </div>
+              <div class="field">
+                <label>Brand</label>
+                <div class="toggle-group" id="brandToggle">
+                  <button type="button" data-value="crazydomains" class="active">Crazy Domains</button>
+                  <button type="button" data-value="vodien">Vodien</button>
+                </div>
+              </div>
+            </div>
+            <div class="checkbox-row" style="margin-bottom:0;">
+              <input type="checkbox" id="g_autoPassword" checked>
+              <label for="g_autoPassword">Auto-fill password as Migrate@[Ticket ID]</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pre-Migration Panel Form -->
+        <div class="panel active" id="panel-premig">
+          <h2>Migration Type</h2>
+          <div class="field">
+            <div class="toggle-group" id="migType_premig">
+              <button type="button" data-value="email" class="active">Email only</button>
+              <button type="button" data-value="website">Website only</button>
+              <button type="button" data-value="both">Website + Email</button>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+          <h2>Hosting</h2>
+          <div class="row2">
+            <div class="field">
+              <label for="premig_currentPlan">Current plan</label>
+              <input type="text" id="premig_currentPlan" placeholder="e.g. iSV20">
+            </div>
+            <div class="field">
+              <label for="premig_destPlan">Destination plan</label>
+              <input type="text" id="premig_destPlan" placeholder="e.g. WebValue">
+            </div>
+          </div>
+          <div class="checkbox-row">
+            <input type="checkbox" id="premig_thankYou">
+            <label for="premig_thankYou">Open with "Thank you for your patience."</label>
+          </div>
+
+          <div class="divider"></div>
+          <h2>DNS Management</h2>
+          <div class="field">
+            <div class="toggle-group" id="premig_dnsManaged">
+              <button type="button" data-value="us" class="active">Managed by us</button>
+              <button type="button" data-value="remote">Remote (managed elsewhere)</button>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+          <h2>Pre-Migration Check Findings</h2>
+          <div class="checkbox-row">
+            <input type="checkbox" id="premig_includeCounts" checked>
+            <label for="premig_includeCounts">Include account/website count summary</label>
+          </div>
+          <div id="premig_countsWrap">
+            <div class="row2">
+              <div class="field">
+                <label for="premig_emailCount">Email accounts found</label>
+                <input type="text" id="premig_emailCount" placeholder="e.g. 2, or 0">
+              </div>
+              <div class="field">
+                <label for="premig_websiteCount">Websites found</label>
+                <input type="text" id="premig_websiteCount" placeholder="e.g. 1">
+              </div>
+            </div>
+            <div class="field">
+              <label for="premig_emailList">Specific mailboxes affected (optional)</label>
+              <textarea id="premig_emailList" placeholder="One address per line, e.g.&#10;mark@domain.com&#10;nello@domain.com"></textarea>
+              <div class="hint">If filled, this replaces the email count line with a listed breakdown.</div>
+            </div>
+          </div>
+          <div class="checkbox-row">
+            <input type="checkbox" id="premig_customFindingToggle">
+            <label for="premig_customFindingToggle">Use custom finding text instead</label>
+          </div>
+          <div class="field" id="premig_customFindingWrap" style="display:none;">
+            <label for="premig_customFinding">Custom finding text</label>
+            <textarea id="premig_customFinding" placeholder="We have completed our pre-migration checks and noticed that ..."></textarea>
+          </div>
+
+          <div class="divider"></div>
+          <h2>DNS Checker Links</h2>
+          <div class="checkbox-row">
+            <input type="checkbox" id="premig_nsChecker">
+            <label for="premig_nsChecker">Include NS record checker link</label>
+          </div>
+          <div class="checkbox-row">
+            <input type="checkbox" id="premig_mxChecker">
+            <label for="premig_mxChecker">Include MX record checker link</label>
+          </div>
+
+          <div class="divider"></div>
+          <h2>TITAN Early Access</h2>
+          <div class="checkbox-row">
+            <input type="checkbox" id="premig_titanEnable">
+            <label for="premig_titanEnable">This is a TITAN migration &ndash; include webmail login now</label>
+          </div>
+          <div id="premig_titanWrap" style="display:none;">
+            <div class="checkbox-row">
+              <input type="checkbox" id="premig_titanMultiple">
+              <label for="premig_titanMultiple">Multiple mailboxes (generic wording + mention temp reset)</label>
+            </div>
+            <div class="row2">
+              <div class="field" id="premig_titanEmailWrap">
+                <label for="premig_titanEmail">Mailbox email address</label>
+                <input type="text" id="premig_titanEmail" placeholder="e.g. sales@domain.com">
+              </div>
+              <div class="field">
+                <label for="premig_titanPassword">Password</label>
+                <input type="text" id="premig_titanPassword" placeholder="auto: Migrate@[Ticket ID]">
+              </div>
+            </div>
+          </div>
+
+          <div id="premig_remoteWrap" style="display:none;">
+            <div class="divider"></div>
+            <h2>Remote DNS &ndash; Records Hand-off</h2>
+            <div class="checkbox-row">
+              <input type="checkbox" id="premig_recordsNow">
+              <label for="premig_recordsNow">Provide the DNS records now (instead of after migration)</label>
+            </div>
+            <div id="premig_recordsNowWrap" style="display:none;">
+              <div class="field">
+                <button type="button" class="btn" id="premig_titanPreset" style="margin-bottom:8px;">Insert TITAN MX + SPF records</button>
+                <textarea id="premig_records" placeholder="MX Records:&#10;Host/Name: @ | Type: MX | Priority: 10 | Value: ..." style="min-height:100px;"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+          <h2>Closing</h2>
+          <div class="checkbox-row">
+            <input type="checkbox" id="premig_screenshots" checked>
+            <label for="premig_screenshots">Mention screenshots attached</label>
+          </div>
+          <div class="checkbox-row">
+            <input type="checkbox" id="premig_scheduled">
+            <label for="premig_scheduled">This case has a firm schedule (date/time)</label>
+          </div>
+          <div id="premig_scheduleFields" style="display:none;">
+            <div class="row3">
+              <div class="field">
+                <label for="premig_date">Date</label>
+                <input type="date" id="premig_date">
+              </div>
+              <div class="field">
+                <label for="premig_time">Time</label>
+                <input type="text" id="premig_time" placeholder="7:00 PM">
+              </div>
+              <div class="field">
+                <label for="premig_timezone">Timezone</label>
+                <input type="text" id="premig_timezone" value="SGT">
+              </div>
+            </div>
+          </div>
+          <div class="checkbox-row">
+            <input type="checkbox" id="premig_contactClose" checked>
+            <label for="premig_contactClose">Include "feel free to contact us" line</label>
+          </div>
+          <div class="checkbox-row">
+            <input type="checkbox" id="premig_includeSignoff">
+            <label for="premig_includeSignoff">Include sign-off line</label>
+          </div>
+          <div class="field" id="premig_signoffWrap" style="display:none;">
+            <input type="text" id="premig_signoffText" placeholder="Regards, Migration Support Team">
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Output Column -->
+      <div class="output-col">
+        <div class="output-head">
+          <h2>Preview</h2>
+          <div class="actions">
+            <button class="btn" id="resetBtn">Reset</button>
+            <button class="btn primary" id="copyBtn">Copy</button>
+          </div>
+        </div>
+        <div class="terminal"><pre id="output"></pre></div>
+        <div class="status-line">
+          <span id="wordCount">0 words</span>
+          <span id="charCount">0 characters</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+  let activeBrand = 'crazydomains';
+  let migTypePremig = 'email';
+  let premigDnsManaged = 'us';
+
+  const TYPE_META = {
+    email: { label:'email', includesEmail:true, includesWebsite:false },
+    website: { label:'website', includesEmail:false, includesWebsite:true },
+    both: { label:'website and email', includesEmail:true, includesWebsite:true }
+  };
+
+  const BRANDS = {
+    crazydomains: {
+      titanWebmail: 'https://crazydomains.titan.email/login/',
+      titanDnsRecordsArticle: 'https://www.crazydomains.com.au/help/article/set-up-mx-and-txt-records-for-titan-email'
+    },
+    vodien: {
+      titanWebmail: 'https://vodien.titan.email/login/',
+      titanDnsRecordsArticle: 'https://www.vodien.com/help/article/set-up-mx-and-txt-records-for-vodien-titan-email'
+    }
+  };
+
+  function formatDate(iso){
+    if(!iso) return '[date]';
+    const d = new Date(iso + 'T00:00:00');
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+  }
+
+  function autoPassword(explicit, ticketId){
+    const v = explicit.trim();
+    if(v) return v;
+    if(!$('g_autoPassword').checked) return '[password]';
+    return `Migrate@${ticketId.trim() || '[Ticket ID]'}`;
+  }
+
+  function getAdditionalDomains(){
+    const raw = $('g_additionalDomains').value.trim();
+    if(!raw) return [];
+    return raw.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
+  }
+
+  function primaryDomain(){
+    return $('g_domain').value.trim() || '[domain]';
+  }
+
+  function domainArray(){
+    return [primaryDomain(), ...getAdditionalDomains()];
+  }
+
+  function domainList(){
+    const list = domainArray();
+    if(list.length === 1) return list[0];
+    if(list.length === 2) return `${list[0]} and ${list[1]}`;
+    return `${list.slice(0,-1).join(', ')} and ${list[list.length-1]}`;
+  }
+
+  function countsFindingParagraph(){
+    const emailCount = $('premig_emailCount').value.trim();
+    const websiteCount = $('premig_websiteCount').value.trim();
+    const emailList = $('premig_emailList').value.trim();
+    const domain = primaryDomain();
+    const lines = [];
+
+    if(emailList){
+      const addresses = emailList.split('\n').map(s=>s.trim()).filter(Boolean);
+      const one = addresses.length === 1;
+      lines.push(`There ${one ? 'is' : 'are'} currently ${addresses.length} email account${one ? '' : 's'} hosted on the source plan:\n\n${addresses.join('\n')}`);
+    } else if(emailCount){
+      const num = parseFloat(emailCount);
+      if(!isNaN(num) && num === 0){
+        lines.push('There are currently no email accounts hosted on the source plan.');
+      } else {
+        const one = !isNaN(num) && num === 1;
+        lines.push(`There ${one ? 'is' : 'are'} currently ${emailCount} email account${one ? '' : 's'} hosted on the source plan under the domain ${domain}.`);
+      }
+    }
+
+    if(websiteCount){
+      const num = parseFloat(websiteCount);
+      const one = !isNaN(num) && num === 1;
+      lines.push(`There ${one ? 'is' : 'are'} ${websiteCount} website${one ? '' : 's'} hosted on the source plan.`);
+    }
+
+    lines.push(premigDnsManaged === 'us'
+      ? 'The DNS/NS records are currently managed by us.'
+      : "The domain's Name Server (NS) records are currently pointing to name servers that are not managed by us.");
+
+    const hasCounts = emailCount || emailList || websiteCount;
+    return hasCounts
+      ? `We have completed the pre-migration checks and can confirm the following:\n\n${lines.join('\n')}`
+      : lines.join('\n');
+  }
+
+  function findingParagraphPremig(){
+    if($('premig_customFindingToggle').checked){
+      return $('premig_customFinding').value.trim() || null;
+    }
+    if(!$('premig_includeCounts').checked){
+      return premigDnsManaged === 'us'
+        ? 'The DNS/NS records are currently managed by us.'
+        : "As part of our pre-migration checks, we found that the domain's Name Server (NS) records are currently pointing to name servers that are not managed by us.";
+    }
+    return countsFindingParagraph();
+  }
+
+  function dnsInstructionsPremig(){
+    const meta = TYPE_META[migTypePremig];
+    const brand = BRANDS[activeBrand];
+    const p = [];
+
+    if(premigDnsManaged === 'us'){
+      const byType = {
+        email: "Once the email migration has been completed, we will need to update the DNS records to point the domain's email services to the new mail server.",
+        website: 'Once the website migration has been completed, we will need to update the relevant DNS records so that the website loads from the new server.',
+        both: 'Once the website and email migration has been completed, we will need to update the DNS records to point the domain to the new hosting plan.'
+      };
+      p.push(byType[migTypePremig]);
+      p.push('Please note that this DNS change will require propagation, which can take approximately 4\u20136 hours to complete worldwide.');
+      if(meta.includesEmail){
+        p.push('If you are using an email client such as Outlook, Thunderbird, Apple Mail, or a mobile mail application, you may need to reconfigure the email account using the new mail server settings after the DNS records have been updated and propagation has completed.');
+      }
+    } else {
+      p.push("Since the domain's Name Servers are managed externally, we will not be able to make the required DNS changes on your behalf.");
+      if($('premig_recordsNow').checked){
+        const records = $('premig_records').value.trim() || '[DNS records]';
+        p.push(`Please update the following DNS records with your current DNS provider:\n\n${records}`);
+        if($('premig_titanEnable').checked){
+          p.push(`You can also find the required DNS records and setup instructions in the General Instructions section of the following article:\n${brand.titanDnsRecordsArticle}`);
+          p.push('Please ensure that any existing MX records are removed or replaced with the above records to avoid conflicts.');
+        }
+      } else {
+        p.push('Once the migration is completed, we will provide you with the required DNS records and their corresponding values, which you can then update with your current DNS provider.');
+      }
+      p.push('We will keep you updated once the migration is complete and the DNS records are ready to be updated.');
+    }
+    return p;
+  }
+
+  function generate(){
+    const meta = TYPE_META[migTypePremig];
+    const currentPlan = $('premig_currentPlan').value.trim();
+    const destPlan = $('premig_destPlan').value.trim();
+    const brand = BRANDS[activeBrand];
+    const scheduled = $('premig_scheduled').checked;
+
+    const p = [];
+    if($('premig_thankYou').checked) p.push('Thank you for your patience.');
+
+    let opening = `We have received your ${meta.label} migration request for ${domainList()}`;
+    if(currentPlan && destPlan) opening += `, from the ${currentPlan} to the ${destPlan}`;
+    opening += '.';
+    p.push(opening);
+
+    const finding = findingParagraphPremig();
+    if(finding) p.push(finding);
+
+    const nsChecked = $('premig_nsChecker').checked;
+    const mxChecked = $('premig_mxChecker').checked;
+    if(nsChecked || mxChecked){
+      const domain = primaryDomain();
+      const linkLines = [`You can view the current ${nsChecked && mxChecked ? 'NS and MX records' : nsChecked ? 'NS records' : 'MX records'} using the following DNS Checker link${nsChecked && mxChecked ? 's' : ''}:`];
+      if(nsChecked) linkLines.push(`https://dnschecker.org/#NS/${domain}`);
+      if(mxChecked) linkLines.push(`https://dnschecker.org/#MX/${domain}`);
+      p.push(linkLines.join('\n'));
+    }
+
+    if($('premig_titanEnable').checked){
+      const multiple = $('premig_titanMultiple').checked;
+      const password = autoPassword($('premig_titanPassword').value, $('g_ticketId').value);
+      const emailLine = multiple ? 'Your respective email address' : ($('premig_titanEmail').value.trim() || '[mailbox email]');
+      p.push('We have created the email account(s) on the TITAN dashboard.');
+      if(multiple){
+        p.push(`You can access the new mailboxes using the Titan Webmail URL below:\n\nWebmail: ${brand.titanWebmail}\nEmail: ${emailLine}\nTemporary Password: ${password}`);
+        p.push(`As the passwords for the existing email accounts were not provided, we will reset the passwords temporarily to proceed with the migration.\n\nThe temporary password for the migration is:\n\n${password}`);
+      } else {
+        p.push(`You can access the new mailbox using the Titan Webmail URL below:\n\nWebmail: ${brand.titanWebmail}\nEmail: ${emailLine}\nPassword: ${password}`);
+      }
+    }
+
+    dnsInstructionsPremig().forEach(line => p.push(line));
+
+    if($('premig_screenshots').checked){
+      const byType = {
+        email: 'We have also attached screenshots showing the current email account status and DNS configuration for your reference.',
+        website: 'We have also attached screenshots showing the current website status and DNS configuration for your reference.',
+        both: 'We have also attached screenshots showing the current website, email account status, and DNS configuration for your reference.'
+      };
+      p.push(byType[migTypePremig]);
+    }
+
+    if(scheduled){
+      const time = $('premig_time').value.trim() || '[time]';
+      const tz = $('premig_timezone').value.trim() || '[TZ]';
+      p.push(`The migration is currently scheduled for:\nDate: ${formatDate($('premig_date').value)}\nTime: After ${time} (${tz})`);
+      p.push('We will proceed with the migration as scheduled unless we hear otherwise from you.');
+    }
+
+    if($('premig_contactClose').checked){
+      p.push("If you have any questions or require any assistance with the DNS update, please feel free to contact us. We'll be happy to assist.");
+    }
+
+    if($('premig_includeSignoff').checked){
+      const signoff = $('premig_signoffText').value.trim();
+      if(signoff) p.push(signoff);
+    }
+
+    const text = p.join('\n\n');
+    $('output').textContent = text;
+    const words = text.trim().split(/\s+/).filter(Boolean).length;
+    $('wordCount').textContent = `${words} words`;
+    $('charCount').textContent = `${text.length} characters`;
+  }
+
+  // Theme toggle
+  function applyTheme(theme){
+    document.documentElement.setAttribute('data-theme', theme);
+    document.querySelectorAll('#themeToggle .opt').forEach(o=>{
+      o.classList.toggle('active', o.dataset.themeValue === theme);
+    });
+    try{ localStorage.setItem('migrationToolTheme', theme); }catch(e){}
+  }
+  document.querySelectorAll('#themeToggle .opt').forEach(opt=>{
+    opt.addEventListener('click', ()=> applyTheme(opt.dataset.themeValue));
+  });
+  applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
+
+  // Brand toggle
+  document.querySelectorAll('#brandToggle button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#brandToggle button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      activeBrand = btn.dataset.value;
+      generate();
+    });
+  });
+
+  // Migration type toggle
+  document.querySelectorAll('#migType_premig button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#migType_premig button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      migTypePremig = btn.dataset.value;
+      generate();
+    });
+  });
+
+  document.querySelectorAll('#premig_dnsManaged button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#premig_dnsManaged button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      premigDnsManaged = btn.dataset.value;
+      $('premig_remoteWrap').style.display = premigDnsManaged === 'remote' ? 'block' : 'none';
+      generate();
+    });
+  });
+
+  // Conditional listeners
+  $('premig_customFindingToggle').addEventListener('change', ()=>{
+    $('premig_customFindingWrap').style.display =$('premig_customFindingToggle').checked ? 'block' : 'none';
+    $('premig_countsWrap').style.display = $('premig_customFindingToggle').checked ? 'none' : ($('premig_includeCounts').checked ? 'block' : 'none');
+    generate();
+  });
+  $('premig_includeCounts').addEventListener('change', ()=>{
+    $('premig_countsWrap').style.display =$('premig_includeCounts').checked ? 'block' : 'none';
+    generate();
+  });
+  $('premig_titanEnable').addEventListener('change', ()=>{
+    $('premig_titanWrap').style.display =$('premig_titanEnable').checked ? 'block' : 'none';
+    generate();
+  });
+  $('premig_titanMultiple').addEventListener('change', ()=>{
+    $('premig_titanEmailWrap').style.display =$('premig_titanMultiple').checked ? 'none' : 'block';
+    generate();
+  });
+  $('premig_recordsNow').addEventListener('change', ()=>{
+    $('premig_recordsNowWrap').style.display =$('premig_recordsNow').checked ? 'block' : 'none';
+    generate();
+  });
+  $('premig_titanPreset').addEventListener('click', ()=>{$('premig_records').value = 'MX Records:\n\nHost/Name: @ | Type: MX | Priority: 10 | Value: mx1.titan.email\nHost/Name: @ | Type: MX | Priority: 20 | Value: mx2.titan.email\n\nSPF Record:\n\nHost/Name: @ | Type: TXT | Value: v=spf1 include:spf.titan.email ~all';
+    generate();
+  });
+  $('premig_includeSignoff').addEventListener('change', ()=>{
+    $('premig_signoffWrap').style.display =$('premig_includeSignoff').checked ? 'block' : 'none';
+    generate();
+  });
+  $('premig_scheduled').addEventListener('change', ()=>{
+    $('premig_scheduleFields').style.display =$('premig_scheduled').checked ? 'block' : 'none';
+    generate();
+  });
+
+  // Bind inputs
+  document.querySelectorAll('input[type=text], input[type=date], select, textarea, input[type=checkbox]').forEach(el=>{
+    el.addEventListener('input', generate);
+    el.addEventListener('change', generate);
+  });
+
+  // Copy / Reset
+  $('copyBtn').addEventListener('click', async ()=>{
+    const text = $('output').textContent;
+    try{ await navigator.clipboard.writeText(text); }catch(e){}
+    const btn = $('copyBtn');
+    const original = btn.textContent;
+    btn.textContent = 'Copied';
+    btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent = original; btn.classList.remove('copied'); }, 1600);
+  });
+
+  $('resetBtn').addEventListener('click', ()=>{
+    document.querySelectorAll('input[type=text]').forEach(el=>el.value='');
+    document.querySelectorAll('textarea').forEach(el=>el.value='');
+    document.querySelectorAll('input[type=date]').forEach(el=>el.value='');
+    $('premig_timezone').value = 'SGT';$('g_autoPassword').checked = true;
+    $('premig_includeCounts').checked = true;
+    $('premig_screenshots').checked = true;
+    $('premig_contactClose').checked = true;
+    generate();
+  });
+
+  $('premig_date').value = new Date().toISOString().slice(0,10);
+  generate();
+</script>
+
+</body>
+</html>

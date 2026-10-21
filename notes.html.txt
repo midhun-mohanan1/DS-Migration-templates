@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Migration Case Notes - Migration Email Templates</title>
+<script>
+  (function(){
+    try{
+      var saved = localStorage.getItem('migrationToolTheme');
+      if(saved === 'dark') document.documentElement.setAttribute('data-theme','dark');
+    }catch(e){}
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="src/css/main.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="dot"></span>
+      <span>Migration Email Templates</span>
+    </div>
+    <nav id="sideNav">
+      <div class="nav-group-label">Pre-Migration</div>
+      <a href="index.html" class="nav-item">Pre-Migration Notice</a>
+
+      <div class="nav-group-label">Post-Migration</div>
+      <a href="cpanel.html" class="nav-item">cPanel (Email / Website)</a>
+      <a href="titan.html" class="nav-item">TITAN &ndash; Standard</a>
+      <a href="titansecure.html" class="nav-item">TITAN &ndash; Secure Link</a>
+      <a href="exchange.html" class="nav-item">Exchange</a>
+
+      <div class="nav-group-label">Internal</div>
+      <a href="notes.html" class="nav-item active">Migration Case Notes</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <h1>Migration Case Notes</h1>
+      <div class="theme-toggle" id="themeToggle">
+        <span class="opt active" data-theme-value="light">Light</span>
+        <span class="opt" data-theme-value="dark">Dark</span>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div class="form-col">
+        <div class="shared-fields">
+          <h2>Case Details</h2>
+          <div class="field">
+            <label for="g_domain">Domain</label>
+            <input type="text" id="g_domain" placeholder="e.g. winkey.com.sg">
+          </div>
+          <div class="field">
+            <label for="g_additionalDomains">Additional domains (optional)</label>
+            <textarea id="g_additionalDomains" placeholder="One per line or comma-separated" style="min-height:44px;"></textarea>
+          </div>
+        </div>
+
+        <div class="panel active" id="panel-notes">
+          <h2>Case</h2>
+          <div class="row2">
+            <div class="field">
+              <label for="notes_rowId">Row ID</label>
+              <input type="text" id="notes_rowId" placeholder="e.g. 530">
+            </div>
+            <div class="field">
+              <label>What is being migrated</label>
+              <div class="toggle-group" id="notes_type">
+                <button type="button" data-value="website">Website</button>
+                <button type="button" data-value="email">Email</button>
+                <button type="button" data-value="both" class="active">Website and emails</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+          <h2>Servers</h2>
+          <div class="row2">
+            <div class="field">
+              <label for="notes_source">Source server</label>
+              <input type="text" id="notes_source" placeholder="e.g. cp-wc33.per01.ds.network">
+            </div>
+            <div class="field">
+              <label for="notes_dest">Destination server</label>
+              <input type="text" id="notes_dest" placeholder="e.g. sh00127.cd.ds.network">
+            </div>
+          </div>
+
+          <div class="divider"></div>
+          <h2>Disk Usage</h2>
+          <div class="field">
+            <label for="notes_diskSource">Disk usage on source</label>
+            <textarea id="notes_diskSource" style="min-height:80px;"></textarea>
+          </div>
+          <div class="field">
+            <label for="notes_diskDest">Disk usage on destination</label>
+            <textarea id="notes_diskDest" style="min-height:80px;"></textarea>
+          </div>
+
+          <div class="divider"></div>
+          <h2>Post-Migration Checks</h2>
+          <div class="field">
+            <label for="notes_dnsStatus">DNS status</label>
+            <input type="text" id="notes_dnsStatus" value="DNS updated">
+          </div>
+          <div class="field">
+            <label>Verified count of email accounts</label>
+            <div class="toggle-group" id="notes_verified">
+              <button type="button" data-value="Yes" class="active">Yes</button>
+              <button type="button" data-value="No">No</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Source archived and old backup deleted</label>
+            <div class="toggle-group" id="notes_archived">
+              <button type="button" data-value="Yes" class="active">Yes</button>
+              <button type="button" data-value="No">No</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="output-col">
+        <div class="output-head">
+          <h2>Preview</h2>
+          <div class="actions">
+            <button class="btn" id="resetBtn">Reset</button>
+            <button class="btn primary" id="copyBtn">Copy</button>
+          </div>
+        </div>
+        <div class="terminal"><pre id="output"></pre></div>
+        <div class="status-line">
+          <span id="wordCount">0 words</span>
+          <span id="charCount">0 characters</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+  let notesType = 'both';
+  let notesVerified = 'Yes';
+  let notesArchived = 'Yes';
+
+  function getAdditionalDomains(){
+    const raw = $('g_additionalDomains').value.trim();
+    if(!raw) return [];
+    return raw.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
+  }
+
+  function primaryDomain(){ return $('g_domain').value.trim() || '[domain]'; }
+  function domainArray(){ return [primaryDomain(), ...getAdditionalDomains()]; }
+
+  function generate(){
+    const rowId = $('notes_rowId').value.trim() || '[Row ID]';
+    const typeLabel = notesType === 'website' ? 'Website' : notesType === 'email' ? 'Email' : 'Website and emails';
+    const source = $('notes_source').value.trim() || '[source server]';
+    const dest = $('notes_dest').value.trim() || '[destination server]';
+    const diskSource = $('notes_diskSource').value.trim() || '[paste du -sch output]';
+    const diskDest = $('notes_diskDest').value.trim() || '[paste du -sch output]';
+    const dnsStatus = $('notes_dnsStatus').value.trim() || 'DNS updated';
+    const domains = domainArray();
+
+    const lines = [];
+    lines.push('Pre-migration notes/pulse:\n');
+    lines.push(`Row ID: ${rowId}\n`);
+    lines.push(`What is being migrated: ${typeLabel}\n`);
+    lines.push('Domains:\n');
+    domains.forEach(d => lines.push(d));
+    lines.push(`\nDisk usage on Source\n\n${diskSource}\n`);
+    lines.push(`Source: ${source}\n`);
+    lines.push(`Destination: ${dest}\n`);
+    lines.push('---------------------------------------------------------------\n');
+    lines.push('Post migration notes/pulse:\n');
+    lines.push(`Disk usage on Destination:\n\n${diskDest}\n`);
+    lines.push(`DNS Status : ${dnsStatus}\n`);
+    lines.push(`Verified count of email accounts & emails listed in webmail: ${notesVerified}\n`);
+    lines.push(`Source archived and old backup deleted: ${notesArchived}`);
+
+    const text = lines.join('\n');
+    $('output').textContent = text;
+    $('wordCount').textContent = `${text.trim().split(/\s+/).filter(Boolean).length} words`;
+    $('charCount').textContent = `${text.length} characters`;
+  }
+
+  function applyTheme(theme){
+    document.documentElement.setAttribute('data-theme', theme);
+    document.querySelectorAll('#themeToggle .opt').forEach(o=>o.classList.toggle('active', o.dataset.themeValue === theme));
+    try{ localStorage.setItem('migrationToolTheme', theme); }catch(e){}
+  }
+  document.querySelectorAll('#themeToggle .opt').forEach(opt=>opt.addEventListener('click', ()=> applyTheme(opt.dataset.themeValue)));
+  applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
+
+  document.querySelectorAll('#notes_type button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#notes_type button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      notesType = btn.dataset.value;
+      generate();
+    });
+  });
+  document.querySelectorAll('#notes_verified button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#notes_verified button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      notesVerified = btn.dataset.value;
+      generate();
+    });
+  });
+  document.querySelectorAll('#notes_archived button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#notes_archived button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      notesArchived = btn.dataset.value;
+      generate();
+    });
+  });
+
+  document.querySelectorAll('input[type=text], textarea').forEach(el=>el.addEventListener('input', generate));
+  $('copyBtn').addEventListener('click', async ()=>{
+    try{ await navigator.clipboard.writeText($('output').textContent); }catch(e){}
+    const btn = $('copyBtn');
+    btn.textContent = 'Copied';
+    btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1600);
+  });
+  $('resetBtn').addEventListener('click', ()=>{
+    document.querySelectorAll('input[type=text], textarea').forEach(el=>el.value='');
+    $('notes_dnsStatus').value = 'DNS updated';
+    generate();
+  });
+  generate();
+</script>
+</body>
+</html>

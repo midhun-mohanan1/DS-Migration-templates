@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TITAN Post-Migration - Migration Email Templates</title>
+<script>
+  (function(){
+    try{
+      var saved = localStorage.getItem('migrationToolTheme');
+      if(saved === 'dark') document.documentElement.setAttribute('data-theme','dark');
+    }catch(e){}
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="src/css/main.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="dot"></span>
+      <span>Migration Email Templates</span>
+    </div>
+    <nav id="sideNav">
+      <div class="nav-group-label">Pre-Migration</div>
+      <a href="index.html" class="nav-item">Pre-Migration Notice</a>
+
+      <div class="nav-group-label">Post-Migration</div>
+      <a href="cpanel.html" class="nav-item">cPanel (Email / Website)</a>
+      <a href="titan.html" class="nav-item active">TITAN &ndash; Standard</a>
+      <a href="titansecure.html" class="nav-item">TITAN &ndash; Secure Link</a>
+      <a href="exchange.html" class="nav-item">Exchange</a>
+
+      <div class="nav-group-label">Internal</div>
+      <a href="notes.html" class="nav-item">Migration Case Notes</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <h1>TITAN Post-Migration &ndash; Standard</h1>
+      <div class="theme-toggle" id="themeToggle">
+        <span class="opt active" data-theme-value="light">Light</span>
+        <span class="opt" data-theme-value="dark">Dark</span>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div class="form-col">
+
+        <!-- Shared Case Details -->
+        <div class="shared-fields">
+          <h2>Case Details</h2>
+          <div class="field">
+            <label for="g_domain">Domain</label>
+            <input type="text" id="g_domain" placeholder="e.g. winkey.com.sg">
+          </div>
+          <div class="field">
+            <label for="g_additionalDomains">Additional domains (optional)</label>
+            <textarea id="g_additionalDomains" placeholder="One per line or comma-separated, e.g. example2.com, example3.com" style="min-height:44px;"></textarea>
+          </div>
+          <div id="sharedExtra">
+            <div class="row2">
+              <div class="field">
+                <label for="g_ticketId">Ticket ID</label>
+                <input type="text" id="g_ticketId" placeholder="E-586620">
+              </div>
+              <div class="field">
+                <label>Brand</label>
+                <div class="toggle-group" id="brandToggle">
+                  <button type="button" data-value="crazydomains" class="active">Crazy Domains</button>
+                  <button type="button" data-value="vodien">Vodien</button>
+                </div>
+              </div>
+            </div>
+            <div class="checkbox-row" style="margin-bottom:0;">
+              <input type="checkbox" id="g_autoPassword" checked>
+              <label for="g_autoPassword">Auto-fill password as Migrate@[Ticket ID]</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- TITAN Standard Panel Form -->
+        <div class="panel active" id="panel-titan">
+          <h2>Migration Type</h2>
+          <div class="field">
+            <div class="toggle-group" id="migType_titan">
+              <button type="button" data-value="email" class="active">Email only</button>
+              <button type="button" data-value="both">Website + Email</button>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+          <h2>New Mailbox</h2>
+          <div class="checkbox-row">
+            <input type="checkbox" id="titan_generic">
+            <label for="titan_generic">Multiple mailboxes (use "Your full email address")</label>
+          </div>
+          <div class="row2">
+            <div class="field" id="titan_emailWrap">
+              <label for="titan_email">Mailbox email address</label>
+              <input type="text" id="titan_email" placeholder="e.g. tim@tamarillo.org">
+            </div>
+            <div class="field">
+              <label for="titan_password">Password</label>
+              <input type="text" id="titan_password" placeholder="auto: Migrate@[Ticket ID]">
+            </div>
+          </div>
+
+          <div class="divider"></div>
+          <h2>DNS Status</h2>
+          <div class="field">
+            <select id="titan_dnsStatus">
+              <option value="already" selected>Already updated previously &ndash; no changes needed</option>
+              <option value="now">Updated now as part of this migration &ndash; in propagation</option>
+            </select>
+          </div>
+
+          <div class="divider"></div>
+          <div class="field">
+            <label for="titan_notes">Additional notes (optional)</label>
+            <textarea id="titan_notes" placeholder="Anything extra to append at the end..."></textarea>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Output Column -->
+      <div class="output-col">
+        <div class="output-head">
+          <h2>Preview</h2>
+          <div class="actions">
+            <button class="btn" id="resetBtn">Reset</button>
+            <button class="btn primary" id="copyBtn">Copy</button>
+          </div>
+        </div>
+        <div class="terminal"><pre id="output"></pre></div>
+        <div class="status-line">
+          <span id="wordCount">0 words</span>
+          <span id="charCount">0 characters</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+  let activeBrand = 'crazydomains';
+  let migTypeTitan = 'email';
+
+  const TYPE_META = {
+    email: { label:'email' },
+    both: { label:'website and email' }
+  };
+
+  const TITAN_FORWARDER_ARTICLE = 'https://support.titan.email/hc/en-us/articles/360038282094-Setup-Outgoing-Forwarding';
+  const TITAN_ENABLE_THIRD_PARTY_ARTICLE = 'https://support.titan.email/hc/en-us/articles/25005307786905-Enable-Titan-on-other-apps';
+
+  const BRANDS = {
+    crazydomains: {
+      label: 'Crazy Domains',
+      titanWebmail: 'https://crazydomains.titan.email/login/',
+      titanFullArticles: [
+        'https://www.crazydomains.com.au/help/article/how-to-use-titan-email',
+        'https://www.crazydomains.com.au/help/article/set-up-titan-email-on-iphone-ipad-or-ipod-touch',
+        'https://www.crazydomains.com.au/help/article/how-to-reset-your-titan-email-password',
+        TITAN_ENABLE_THIRD_PARTY_ARTICLE,
+        'https://support.titan.email/hc/en-us/articles/900001311526-Configure-Titan-Mail-on-Outlook',
+        'https://support.titan.email/hc/en-us/articles/900000215446-Configure-Titan-on-other-apps-using-IMAP-POP'
+      ],
+      titanQuickArticles: [
+        'https://www.crazydomains.com.au/help/article/how-to-use-titan-email',
+        'https://www.crazydomains.com.au/help/article/set-up-titan-email-on-iphone-ipad-or-ipod-touch',
+        'https://www.crazydomains.com.au/help/article/how-to-reset-your-titan-email-password'
+      ],
+      titanPasswordResetArticle: 'https://www.crazydomains.com.au/help/article/how-to-reset-your-titan-email-password'
+    },
+    vodien: {
+      label: 'Vodien',
+      titanWebmail: 'https://vodien.titan.email/login/',
+      titanFullArticles: [
+        'https://www.vodien.com/help/article/the-titan-email-account'
+      ],
+      titanQuickArticles: [
+        'https://www.vodien.com/help/article/the-titan-email-account'
+      ],
+      titanPasswordResetArticle: 'https://www.vodien.com/help/article/the-titan-email-account'
+    }
+  };
+
+  function autoPassword(explicit, ticketId){
+    const v = explicit.trim();
+    if(v) return v;
+    if(!$('g_autoPassword').checked) return '[password]';
+    return `Migrate@${ticketId.trim() || '[Ticket ID]'}`;
+  }
+
+  function getAdditionalDomains(){
+    const raw = $('g_additionalDomains').value.trim();
+    if(!raw) return [];
+    return raw.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
+  }
+
+  function primaryDomain(){
+    return $('g_domain').value.trim() || '[domain]';
+  }
+
+  function domainArray(){
+    return [primaryDomain(), ...getAdditionalDomains()];
+  }
+
+  function domainList(){
+    const list = domainArray();
+    if(list.length === 1) return list[0];
+    if(list.length === 2) return `${list[0]} and ${list[1]}`;
+    return `${list.slice(0,-1).join(', ')} and ${list[list.length-1]}`;
+  }
+
+  function generate(){
+    const brand = BRANDS[activeBrand];
+    const meta = TYPE_META[migTypeTitan];
+    const generic = $('titan_generic').checked;
+    const email = generic ? 'Your full email address' : ($('titan_email').value.trim() || '[mailbox email]');
+    const password = autoPassword($('titan_password').value, $('g_ticketId').value);
+    const dnsStatus = $('titan_dnsStatus').value;
+
+    const p = [];
+    p.push(`We are pleased to inform you that the ${meta.label} migration for ${domainList()} has been completed successfully.`);
+
+    if(dnsStatus === 'already'){
+      p.push('Since the DNS records are already updated there are no changes needed on the DNS records.');
+    } else {
+      p.push('We have already updated the DNS records.');
+      p.push('Please note that DNS propagation may take approximately 4\u20136 hours to complete. During this time, some users may continue to connect to the previous mail server while others may connect to the new platform.');
+    }
+
+    p.push(`You can access the new mailbox using the webmail URL below:\nWebmail: ${brand.titanWebmail}\nEmail: ${email}\nPassword: ${password}`);
+    p.push(`You can reset the TITAN password with the help of the below article\n${brand.titanPasswordResetArticle}`);
+
+    if(dnsStatus === 'now'){
+      p.push('Since the DNS records have already been updated, no further changes are required.');
+    }
+
+    p.push('Please note that if you are using any email clients such as Outlook, Thunderbird, Apple Mail, or mobile mail applications, you will need to reconfigure them using the TITAN mail settings from the below articles.');
+    p.push(`Please refer to the below articles for configuring your TITAN Email accounts:\n${brand.titanFullArticles.join('\n')}`);
+    p.push(`For adding email forwarders you can use this article\n${TITAN_FORWARDER_ARTICLE}`);
+    p.push(`Should you encounter any issues during the setup or notice any discrepancies with your email functionality, please feel free to contact us. We will be happy to assist you.\n${brand.titanQuickArticles.join('\n')}\n${brand.titanWebmail}`);
+
+    const notes = $('titan_notes').value.trim();
+    if(notes) p.push(notes);
+
+    const text = p.join('\n\n');
+    $('output').textContent = text;
+    const words = text.trim().split(/\s+/).filter(Boolean).length;
+    $('wordCount').textContent = `${words} words`;
+    $('charCount').textContent = `${text.length} characters`;
+  }
+
+  // Theme toggle
+  function applyTheme(theme){
+    document.documentElement.setAttribute('data-theme', theme);
+    document.querySelectorAll('#themeToggle .opt').forEach(o=>{
+      o.classList.toggle('active', o.dataset.themeValue === theme);
+    });
+    try{ localStorage.setItem('migrationToolTheme', theme); }catch(e){}
+  }
+  document.querySelectorAll('#themeToggle .opt').forEach(opt=>{
+    opt.addEventListener('click', ()=> applyTheme(opt.dataset.themeValue));
+  });
+  applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
+
+  // Brand toggle
+  document.querySelectorAll('#brandToggle button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#brandToggle button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      activeBrand = btn.dataset.value;
+      generate();
+    });
+  });
+
+  // Migration type toggle
+  document.querySelectorAll('#migType_titan button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#migType_titan button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      migTypeTitan = btn.dataset.value;
+      generate();
+    });
+  });
+
+  $('titan_generic').addEventListener('change', ()=>{
+    $('titan_emailWrap').style.display =$('titan_generic').checked ? 'none' : 'block';
+    generate();
+  });
+
+  // Bind inputs
+  document.querySelectorAll('input[type=text], select, textarea, input[type=checkbox]').forEach(el=>{
+    el.addEventListener('input', generate);
+    el.addEventListener('change', generate);
+  });
+
+  // Copy / Reset
+  $('copyBtn').addEventListener('click', async ()=>{
+    const text = $('output').textContent;
+    try{ await navigator.clipboard.writeText(text); }catch(e){}
+    const btn = $('copyBtn');
+    const original = btn.textContent;
+    btn.textContent = 'Copied';
+    btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent = original; btn.classList.remove('copied'); }, 1600);
+  });
+
+  $('resetBtn').addEventListener('click', ()=>{
+    document.querySelectorAll('input[type=text]').forEach(el=>el.value='');
+    document.querySelectorAll('textarea').forEach(el=>el.value='');
+    $('g_autoPassword').checked = true;
+    $('titan_generic').checked = false;
+    $('titan_dnsStatus').value = 'already';$('titan_emailWrap').style.display = 'block';
+    generate();
+  });
+
+  generate();
+</script>
+
+</body>
+</html>

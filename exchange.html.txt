@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exchange Post-Migration - Migration Email Templates</title>
+<script>
+  (function(){
+    try{
+      var saved = localStorage.getItem('migrationToolTheme');
+      if(saved === 'dark') document.documentElement.setAttribute('data-theme','dark');
+    }catch(e){}
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="src/css/main.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="dot"></span>
+      <span>Migration Email Templates</span>
+    </div>
+    <nav id="sideNav">
+      <div class="nav-group-label">Pre-Migration</div>
+      <a href="index.html" class="nav-item">Pre-Migration Notice</a>
+
+      <div class="nav-group-label">Post-Migration</div>
+      <a href="cpanel.html" class="nav-item">cPanel (Email / Website)</a>
+      <a href="titan.html" class="nav-item">TITAN &ndash; Standard</a>
+      <a href="titansecure.html" class="nav-item">TITAN &ndash; Secure Link</a>
+      <a href="exchange.html" class="nav-item active">Exchange</a>
+
+      <div class="nav-group-label">Internal</div>
+      <a href="notes.html" class="nav-item">Migration Case Notes</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <h1>Exchange Post-Migration</h1>
+      <div class="theme-toggle" id="themeToggle">
+        <span class="opt active" data-theme-value="light">Light</span>
+        <span class="opt" data-theme-value="dark">Dark</span>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div class="form-col">
+        <div class="shared-fields">
+          <h2>Case Details</h2>
+          <div class="field">
+            <label for="g_domain">Domain</label>
+            <input type="text" id="g_domain" placeholder="e.g. winkey.com.sg">
+          </div>
+          <div class="field">
+            <label for="g_additionalDomains">Additional domains (optional)</label>
+            <textarea id="g_additionalDomains" placeholder="One per line or comma-separated" style="min-height:44px;"></textarea>
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label for="g_ticketId">Ticket ID</label>
+              <input type="text" id="g_ticketId" placeholder="E-586620">
+            </div>
+            <div class="field">
+              <label>Brand</label>
+              <div class="toggle-group" id="brandToggle">
+                <button type="button" data-value="crazydomains" class="active">Crazy Domains</button>
+                <button type="button" data-value="vodien">Vodien</button>
+              </div>
+            </div>
+          </div>
+          <div class="checkbox-row" style="margin-bottom:0;">
+            <input type="checkbox" id="g_autoPassword" checked>
+            <label for="g_autoPassword">Auto-fill password as Migrate@[Ticket ID]</label>
+          </div>
+        </div>
+
+        <div class="panel active" id="panel-exchange">
+          <h2>Webmail Access</h2>
+          <div class="row2">
+            <div class="field">
+              <label for="exch_webmail">Webmail URL</label>
+              <input type="text" id="exch_webmail" value="https://mail.premium.exchange/owa/">
+            </div>
+            <div class="field">
+              <label for="exch_password">Temporary password</label>
+              <input type="text" id="exch_password" placeholder="auto: Migrate@[Ticket ID]">
+            </div>
+          </div>
+
+          <div class="divider"></div>
+          <h2>DNS Status</h2>
+          <div class="field">
+            <select id="exch_dnsStatus">
+              <option value="already" selected>Already updated &ndash; in propagation (4&ndash;6 hrs)</option>
+              <option value="remote">Remote DNS &ndash; customer must update at their end</option>
+            </select>
+          </div>
+          <div class="field" id="exch_remoteRecordsWrap" style="display:none;">
+            <label for="exch_remoteRecords">DNS records for customer to update</label>
+            <textarea id="exch_remoteRecords" placeholder="e.g. MX record: mail.protection.outlook.com"></textarea>
+          </div>
+
+          <div class="divider"></div>
+          <div class="field">
+            <label for="exch_notes">Additional notes (optional)</label>
+            <textarea id="exch_notes" placeholder="Anything extra to append at the end..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="output-col">
+        <div class="output-head">
+          <h2>Preview</h2>
+          <div class="actions">
+            <button class="btn" id="resetBtn">Reset</button>
+            <button class="btn primary" id="copyBtn">Copy</button>
+          </div>
+        </div>
+        <div class="terminal"><pre id="output"></pre></div>
+        <div class="status-line">
+          <span id="wordCount">0 words</span>
+          <span id="charCount">0 characters</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+
+  function autoPassword(explicit, ticketId){
+    const v = explicit.trim();
+    if(v) return v;
+    if(!$('g_autoPassword').checked) return '[password]';
+    return `Migrate@${ticketId.trim() || '[Ticket ID]'}`;
+  }
+
+  function getAdditionalDomains(){
+    const raw = $('g_additionalDomains').value.trim();
+    if(!raw) return [];
+    return raw.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
+  }
+
+  function primaryDomain(){ return $('g_domain').value.trim() || '[domain]'; }
+  function domainArray(){ return [primaryDomain(), ...getAdditionalDomains()]; }
+  function domainList(){
+    const list = domainArray();
+    if(list.length === 1) return list[0];
+    if(list.length === 2) return `${list[0]} and ${list[1]}`;
+    return `${list.slice(0,-1).join(', ')} and ${list[list.length-1]}`;
+  }
+
+  function generate(){
+    const webmail = $('exch_webmail').value.trim() || '[webmail URL]';
+    const password = autoPassword($('exch_password').value, $('g_ticketId').value);
+    const dnsStatus = $('exch_dnsStatus').value;
+    const p = [];
+
+    p.push('Greetings from the Migration Department!');
+    p.push(`The Email migration of ${domainList()} is now completed.`);
+    p.push(`You can access the webmail from the below URL:\n${webmail}\nTemporary Password:\n${password}`);
+    p.push('Please review and confirm that all your emails are visible in the exchange Webmail.');
+
+    if(dnsStatus === 'already'){
+      p.push('The DNS records are already updated and they are in propagation. Please wait 4-6 hours to complete the DNS propagation.');
+      p.push('After the DNS propagation is complete, you can use the articles below to reconfigure your email account in your preferred email client.');
+    } else {
+      const records = $('exch_remoteRecords').value.trim() || '[DNS records to provide]';
+      p.push(`As your domain's DNS is hosted with a different provider, we will need you to update the following DNS records on your nameserver end:\n${records}`);
+      p.push('Once these records are updated and propagation is complete, you can use the articles below to reconfigure your email account.');
+    }
+
+    p.push([
+      'https://www.crazydomains.com.au/help/article/getting-started-guide-email-exchange-in-outlook',
+      'https://www.crazydomains.com.au/help/article/how-to-set-up-email-exchange-with-outlook-2019',
+      'https://www.crazydomains.com.au/help/article/how-to-forward-emails-with-email-exchange',
+      'https://www.crazydomains.com.au/help/article/how-to-reset-a-mailbox-password-for-email-exchange',
+      'https://www.crazydomains.com.au/help/article/set-up-email-exchange-with-mac-mail'
+    ].join('\n'));
+
+    p.push("Should you encounter any issues during setup or notice discrepancies in your email functionality, don't hesitate to contact us. We're here to help!");
+
+    const notes = $('exch_notes').value.trim();
+    if(notes) p.push(notes);
+
+    const text = p.join('\n\n');
+    $('output').textContent = text;
+    $('wordCount').textContent = `${text.trim().split(/\s+/).filter(Boolean).length} words`;
+    $('charCount').textContent = `${text.length} characters`;
+  }
+
+  function applyTheme(theme){
+    document.documentElement.setAttribute('data-theme', theme);
+    document.querySelectorAll('#themeToggle .opt').forEach(o=>o.classList.toggle('active', o.dataset.themeValue === theme));
+    try{ localStorage.setItem('migrationToolTheme', theme); }catch(e){}
+  }
+  document.querySelectorAll('#themeToggle .opt').forEach(opt=>opt.addEventListener('click', ()=> applyTheme(opt.dataset.themeValue)));
+  applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
+
+  $('exch_dnsStatus').addEventListener('change', ()=>{
+    $('exch_remoteRecordsWrap').style.display =$('exch_dnsStatus').value === 'remote' ? 'block' : 'none';
+    generate();
+  });
+
+  document.querySelectorAll('input[type=text], select, textarea, input[type=checkbox]').forEach(el=>el.addEventListener('input', generate));
+  $('copyBtn').addEventListener('click', async ()=>{
+    try{ await navigator.clipboard.writeText($('output').textContent); }catch(e){}
+    const btn = $('copyBtn');
+    btn.textContent = 'Copied';
+    btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1600);
+  });
+  $('resetBtn').addEventListener('click', ()=>{
+    document.querySelectorAll('input[type=text]').forEach(el=>el.value='');
+    document.querySelectorAll('textarea').forEach(el=>el.value='');
+    $('exch_webmail').value = 'https://mail.premium.exchange/owa/';
+    $('exch_dnsStatus').value = 'already';$('exch_remoteRecordsWrap').style.display = 'none';
+    generate();
+  });
+  generate();
+</script>
+</body>
+</html>
